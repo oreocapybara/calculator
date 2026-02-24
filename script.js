@@ -7,19 +7,42 @@ buttons.forEach((button) => {
 	button.addEventListener("click", handleClick);
 });
 
+document.addEventListener("keydown", (e) => {
+	const value = keyMap[e.key] || e.key;
+	handleClick(value);
+});
+
 //variables
 let storedValue = ""; //contains first number
 let currentInput = ""; //contains second number
 let operand = ""; //operand
 
 function handleClick(event) {
-	let value = event.target.textContent; // The value of the button
+	let value = typeof event === "string" ? event : event.target.textContent; // The value of the button
 
 	switch (true) {
 		case isNumber(value):
-			currentInput += value; //append to current input;
+			//prevent from entering just zero
+			if (value === "0" && currentInput === "0") {
+				currentInput = "";
+				break;
+			}
+
+			// if the current input was 0 then just assign the value to override
+			if (currentInput === "0" && value !== currentInput) {
+				currentInput = value; // assign the current input to the value
+			} else if (currentInput.startsWith("-") && currentInput.at(1) === "0") {
+				// replace the following zero digit with the value
+				currentInput = currentInput.slice(0, 1) + value;
+			} else {
+				currentInput += value; //append to current input;
+			}
+
 			//Change AC state to CE for clearing an clear
-			updateClearButton();
+			if (currentInput !== "0") {
+				// only change if the numbers are not zero
+				updateClearButton();
+			}
 			updateDisplay(currentInput);
 
 			break;
@@ -101,35 +124,38 @@ function operate(num1, num2, operand) {
 
 //Operation functions
 function add(num1, num2) {
-	return num1 + num2;
+	return parseFloat((num1 + num2).toFixed(4));
 }
 
 function subtract(num1, num2) {
-	return num1 - num2;
+	return parseFloat((num1 - num2).toFixed(4));
 }
 
 function multiply(num1, num2) {
-	return num1 * num2;
+	return parseFloat((num1 * num2).toFixed(4));
 }
 
 function divide(num1, num2) {
 	if (num2 === 0) {
 		return NaN;
 	}
-	return num1 / num2;
+	return parseFloat((num1 / num2).toFixed(4));
 }
 
 function percentage(num) {
-	return parseFloat(num / 100);
+	if (num === "" || num === "0") {
+		return "0";
+	} else {
+		return parseFloat((num / 100).toFixed(4));
+	}
 }
 
 function toggleSign(num) {
 	if (num.startsWith("-")) {
 		return num.slice(1);
-	} else if (num === ""){
+	} else if (num === "") {
 		return `-0`;
-	}
-	else {
+	} else {
 		return `-${num}`;
 	}
 }
@@ -145,7 +171,11 @@ function decimal(num) {
 }
 
 function squareRoot(num) {
-	return parseFloat(Math.sqrt(num));
+	if (num === "" || num === "0") {
+		return "0";
+	} else {
+		return parseFloat(Math.sqrt(num).toFixed(4));
+	}
 }
 
 //Clear
@@ -159,8 +189,8 @@ function allClear() {
 
 function clearEntry() {
 	currentInput = "";
-    display.value = "0";
-    updateClearButton();
+	display.value = "0";
+	updateClearButton();
 }
 
 //clear button state
@@ -168,7 +198,7 @@ function updateClearButton() {
 	if (currentInput !== "") {
 		clearButton.textContent = "CE";
 	} else {
-		clearButton.textContent = "AC"
+		clearButton.textContent = "AC";
 	}
 }
 
@@ -180,10 +210,10 @@ function updateDisplay(input) {
 	display.value = input;
 }
 
-function decimal(num) {
-	if (num.includes(".")) {
-		return;
-	} else {
-		return `${num}.`;
-	}
-}
+const keyMap = {
+	"*": "×",
+	"/": "÷",
+	Enter: "=",
+	Escape: "AC",
+	Backspace: "CE",
+};
