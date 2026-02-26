@@ -8,7 +8,12 @@ buttons.forEach((button) => {
 });
 
 document.addEventListener("keydown", (e) => {
+	if (e.key === "/" || e.key === "Enter"){
+		e.preventDefault();
+	}
+
 	const value = keyMap[e.key] || e.key;
+
 	handleClick(value);
 });
 
@@ -24,14 +29,13 @@ function handleClick(event) {
 		case isNumber(value):
 			//prevent from entering just zero
 			if (value === "0" && currentInput === "0") {
-				currentInput = "";
 				break;
 			}
 
 			// if the current input was 0 then just assign the value to override
 			if (currentInput === "0" && value !== currentInput) {
 				currentInput = value; // assign the current input to the value
-			} else if (currentInput.startsWith("-") && currentInput.at(1) === "0") {
+			} else if (currentInput.at(0) === "-" && currentInput.at(1) === "0") {
 				// replace the following zero digit with the value
 				currentInput = currentInput.slice(0, 1) + value;
 			} else {
@@ -112,13 +116,13 @@ function operate(num1, num2, operand) {
 
 	switch (operand) {
 		case "+":
-			return add(convertedNum, convertedNum2);
+			return String(add(convertedNum, convertedNum2));
 		case "-":
-			return subtract(convertedNum, convertedNum2);
+			return String(subtract(convertedNum, convertedNum2));
 		case "×":
-			return multiply(convertedNum, convertedNum2);
+			return String(multiply(convertedNum, convertedNum2));
 		case "÷":
-			return divide(convertedNum, convertedNum2);
+			return String(divide(convertedNum, convertedNum2));
 	}
 }
 
@@ -146,7 +150,7 @@ function percentage(num) {
 	if (num === "" || num === "0") {
 		return "0";
 	} else {
-		return parseFloat((num / 100).toFixed(4));
+		return String(parseFloat((num / 100).toFixed(4)));
 	}
 }
 
@@ -174,7 +178,7 @@ function squareRoot(num) {
 	if (num === "" || num === "0") {
 		return "0";
 	} else {
-		return parseFloat(Math.sqrt(num).toFixed(4));
+		return String(parseFloat(Math.sqrt(num).toFixed(4)));
 	}
 }
 
